@@ -1,25 +1,41 @@
-def mostrar_menu():
-    print("\n--- MENÚ DE GESTIÓN DE CLIENTES ---")
+import re
+
+def printMenu():
     print("1. Añadir cliente")
     print("2. Eliminar cliente")
     print("3. Mostrar cliente")
-    print("4. Listar todos los clientes")
-    print("5. Listar clientes preferentes")
-    print("6. Terminar")
+    print("4. Mostrar todos los clientes")
+    print("5. Mostrar clientes preferentes")
+    print("6. Cerrar programa")
+    print("--------------------")
+    
+    
+def validateEmail(correo):
+    patron = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(patron, correo) is not None
 
-
-def añadir_cliente(clientes):
+def addClient(clientes):
     cuit = input("Ingrese el CUIT del cliente: ")
-    if cuit in clientes:
-        print("Ese CUIT ya está registrado.")
-        return
-    nombre = input("Nombre: ")
-    direccion = input("Dirección: ")
-    telefono = input("Teléfono: ")
-    correo = input("Correo electrónico: ")
-    preferente_input = input("¿Es cliente preferente? (s/n): ").strip().lower()
-    preferente = preferente_input == 's'
+    nombre = input("Ingrese el nombre del cliente: ")
+    direccion = input("Ingrese la dirección del cliente: ")
+    telefono = input("Ingrese el teléfono del cliente: ")
+    
+    while True:
+        correo = input("Ingrese el correo del cliente: ")
+        if validateEmail(correo):
+            break
+        else:
+            print("Correo no válido. Intente de nuevo.")
 
+    
+    while True:
+        preferente = input("¿Es cliente preferente? (s/n): ").lower()
+        if preferente in ['s', 'n']:
+            preferente = preferente == 's'
+            break
+        else:
+            print("Opción no válida. Por favor, ingrese 's' o 'n'.")
+    
     clientes[cuit] = {
         "nombre": nombre,
         "direccion": direccion,
@@ -28,69 +44,54 @@ def añadir_cliente(clientes):
         "preferente": preferente
     }
     print("Cliente añadido correctamente.")
-
-
-def eliminar_cliente(clientes):
+    
+    
+def deleteClient(clientes):
     cuit = input("Ingrese el CUIT del cliente a eliminar: ")
     if cuit in clientes:
         del clientes[cuit]
         print("Cliente eliminado correctamente.")
     else:
-        print("No se encontró ningún cliente con ese CUIT.")
+        print("Cliente no encontrado.")
 
-
-def mostrar_cliente(clientes):
+def searchClient(clientes):
     cuit = input("Ingrese el CUIT del cliente a mostrar: ")
     cliente = clientes.get(cuit)
     if cliente:
         print("\nDatos del cliente:")
-        for clave, valor in cliente.items():
-            print(f"{clave.capitalize()}: {valor}")
+        print(cliente)
     else:
         print("Cliente no encontrado.")
 
-
-def listar_todos(clientes):
+def listAllClients(clientes, preferentes=False):
+    print("\n--- Lista de Clientes ---")
+    for cuit, datos in clientes.items():
+        if not preferentes or datos["preferente"]:
+            print(f"CUIT: {cuit}, Nombre: {datos['nombre']}")
     if not clientes:
-        print("No hay clientes en la base de datos.")
-    else:
-        print("\nListado de todos los clientes:")
-        for cuit, datos in clientes.items():
-            print(f"CUIT: {cuit} - Nombre: {datos['nombre']}")
+        print("No hay clientes registrados.")
 
-
-def listar_preferentes(clientes):
-    preferentes = {cuit: datos for cuit, datos in clientes.items() if datos["preferente"]}
-    if not preferentes:
-        print("No hay clientes preferentes.")
-    else:
-        print("\nListado de clientes preferentes:")
-        for cuit, datos in preferentes.items():
-            print(f"CUIT: {cuit} - Nombre: {datos['nombre']}")
-
-
-def main():
-    clientes = {}
-    while True:
-        mostrar_menu()
-        opcion = input("Seleccione una opción (1-6): ")
-
-        if opcion == '1':
-            añadir_cliente(clientes)
-        elif opcion == '2':
-            eliminar_cliente(clientes)
-        elif opcion == '3':
-            mostrar_cliente(clientes)
-        elif opcion == '4':
-            listar_todos(clientes)
-        elif opcion == '5':
-            listar_preferentes(clientes)
-        elif opcion == '6':
-            print("Programa finalizado.")
-            break
-        else:
-            print("Opción inválida. Intente nuevamente.")
-
-
-if __name__ == "__main__":
-    main()
+def __main__():
+    clientes = dict()
+    print("Gestor de clientes")
+    userInput = 0
+    
+    while userInput !=6:
+        printMenu()
+        userInput = int(input("Ingrese una opción válida: "))
+        
+        if userInput == 1:
+            addClient(clientes)
+        if userInput == 2:
+            deleteClient(clientes)
+        if userInput == 3:
+            searchClient(clientes)
+        if userInput == 4:
+            listAllClients(clientes)
+        if userInput == 5:
+            listAllClients(clientes, True)
+    
+    print("Cerrando el programa...")
+    quit()
+    
+__main__()
